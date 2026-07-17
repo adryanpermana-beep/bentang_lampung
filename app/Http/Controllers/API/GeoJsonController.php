@@ -109,48 +109,57 @@ class GeoJsonController extends Controller
 
     /**
      * Mengambil data spasial desa sekaligus JOIN dengan data dari schema kesehatan
+     * PERBAIKAN: Konstruksi GeoJSON manual agar tidak memicu error data pada agregasi JSONB
      */
     public function getKesehatan($kecamatan_code)
     {
         $query = "
             SELECT json_build_object(
                 'type', 'FeatureCollection',
-                'features', json_agg(ST_AsGeoJSON(t.*)::json)
-            ) as geojson
-            FROM (
-                SELECT 
-                    w.kode AS kode_desa,
-                    w.nama AS nama_desa,
-                    w.geometry,
-                    COALESCE(
-                        jsonb_agg(
-                            jsonb_build_object(
-                                'provinsi', k.provinsi,
-                                'kabupaten_kota', k.kabupaten_kota,
-                                'kecamatan', k.kecamatan,
-                                'status', k.status,
-                                'jenis_tenaga_medis', k.jenis_tenaga_medis,
-                                'jumlah_personil', k.jumlah_personil,
-                                'tanggal_data', k.tanggal_data
+                'features', COALESCE(json_agg(
+                    json_build_object(
+                        'type', 'Feature',
+                        'geometry', ST_AsGeoJSON(w.geometry)::json,
+                        'properties', json_build_object(
+                            'kode_desa', w.kode,
+                            'nama_desa', w.nama,
+                            'data_kesehatan', COALESCE(
+                                jsonb_agg(
+                                    jsonb_build_object(
+                                        'provinsi', k.provinsi,
+                                        'kabupaten_kota', k.kabupaten_kota,
+                                        'kecamatan', k.kecamatan,
+                                        'status', k.status,
+                                        'jenis_tenaga_medis', k.jenis_tenaga_medis,
+                                        'jumlah_personil', k.jumlah_personil,
+                                        'tanggal_data', k.tanggal_data
+                                    )
+                                ) FILTER (WHERE k.kode_desa IS NOT NULL), '[]'::jsonb
                             )
-                        ) FILTER (WHERE k.kode_desa IS NOT NULL), '[]'::jsonb
-                    ) AS data_kesehatan
-                FROM master_data.wilayah w
-                LEFT JOIN kesehatan.tenaga_medis k ON w.kode = k.kode_desa
-                WHERE LENGTH(w.kode) = 10 
-                  AND SUBSTRING(w.kode FROM 1 FOR 6) = :kecamatan_code
-                GROUP BY w.kode, w.nama, w.geometry
-            ) AS t;
+                        )
+                    )
+                ), '[]'::json)
+            ) as geojson
+            FROM master_data.wilayah w
+            LEFT JOIN kesehatan.tenaga_medis k ON w.kode = k.kode_desa
+            WHERE LENGTH(w.kode) = 10 
+              AND SUBSTRING(w.kode FROM 1 FOR 6) = :kecamatan_code
+            GROUP BY w.kode, w.nama, w.geometry;
         ";
 
         try {
             $result = DB::select($query, ['kecamatan_code' => $kecamatan_code]);
+            
             if (empty($result) || !$result[0]->geojson) {
                 return response()->json(['type' => 'FeatureCollection', 'features' => []]);
             }
+            
             return response()->json(json_decode($result[0]->geojson));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Gagal memproses data tematik kesehatan: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => true,
+                'message' => 'Gagal memproses data tematik kesehatan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
