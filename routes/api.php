@@ -25,3 +25,9 @@ Route::get('/wilayah/kecamatan/{kabupaten_code}', 'API\GeoJsonController@getKeca
 
 // 3. Ambil Desa berdasarkan Kode Kecamatan
 Route::get('/wilayah/desa/{kecamatan_code}', 'API\GeoJsonController@getDesa');
+
+// 4. Ambil Tematik Data Kesehatan Desa berdasarkan Kode Kecamatan
+Route::get('/wilayah/kesehatan/{kecamatan_code}', 'API\GeoJsonController@getKesehatan');
+
+// 5. Garis batas luar terluar kabupaten
+Route::get('/batas-kabupaten', 'API\GeoJsonController@getBatasKabupaten');

@@ -41,7 +41,7 @@
         
         .menu-heading { padding: 15px 20px 5px 20px; font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
         .menu-list { list-style: none; padding: 0; margin: 0; }
-        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: #555; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: #555; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; }
         .menu-item i { width: 20px; text-align: center; color: #666; }
         .menu-item:hover { background: #f4f7f6; color: #028090; }
         
@@ -93,16 +93,16 @@
         
         <div class="menu-heading">Data Profile</div>
         <ul class="menu-list">
-            <li class="menu-item"><i class="fa-solid fa-users"></i> Demografi Wilayah</li>
-            <li class="menu-item"><i class="fa-solid fa-chart-line"></i> Potensi Daerah</li>
+            <a href="javascript:void(0)" class="menu-item"><i class="fa-solid fa-users"></i> Demografi Wilayah</a>
+            <a href="javascript:void(0)" class="menu-item"><i class="fa-solid fa-chart-line"></i> Potensi Daerah</a>
         </ul>
         
         <div class="menu-heading">Data Tematik</div>
         <ul class="menu-list">
-            <li class="menu-item"><i class="fa-solid fa-building-flag"></i> Sarana Pemerintahan</li>
-            <li class="menu-item"><i class="fa-solid fa-notes-medical"></i> Fasilitas Kesehatan</li>
-            <li class="menu-item"><i class="fa-solid fa-graduation-cap"></i> Pendidikan</li>
-            <li class="menu-item"><i class="fa-solid fa-mosque"></i> Keagamaan</li>
+            <a href="javascript:void(0)" class="menu-item"><i class="fa-solid fa-building-flag"></i> Sarana Pemerintahan</a>
+            <a href="javascript:void(0)" class="menu-item" onclick="loadTematikKesehatan(event)"><i class="fa-solid fa-notes-medical"></i> Kesehatan</a>
+            <a href="javascript:void(0)" class="menu-item"><i class="fa-solid fa-graduation-cap"></i> Pendidikan</a>
+            <a href="javascript:void(0)" class="menu-item"><i class="fa-solid fa-mosque"></i> Keagamaan</a>
         </ul>
     </div>
     
@@ -115,38 +115,39 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
-        var map = L.map('map', { zoomControl: false }).setView([-4.85, 105.0], 9);
+        const map = L.map('map', { zoomControl: false }).setView([-4.85, 105.0], 9);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         // BASEMAP SATELIT
-        var satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google Maps'
         }).addTo(map);
 
-        var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
         // Layer Group khusus untuk garis batas luar kabupaten agar selalu tampil paling atas
-        var batasKabupatenGroup = L.layerGroup().addTo(map);
+        const batasKabupatenGroup = L.layerGroup().addTo(map);
+        const tematikKesehatanGroup = L.layerGroup().addTo(map);
 
         L.control.layers(
             { "Satelit": satelliteLayer, "Peta Jalan": openStreetMap }, 
-            { "Garis Batas Kabupaten": batasKabupatenGroup }, 
+            { "Garis Batas Kabupaten": batasKabupatenGroup, "Layer Tematik Kesehatan": tematikKesehatanGroup }, 
             { position: 'topright' }
         ).addTo(map);
 
         // State Navigasi & Penyimpanan Kode Aktif
-        var geojsonLayer;
-        var currentLevel = 'provinsi'; // 'provinsi', 'kabupaten', 'kecamatan'
+        let geojsonLayer;
+        let currentLevel = 'provinsi'; // 'provinsi', 'kabupaten', 'kecamatan'
         
-        var activeKabCode = "";
-        var activeKecCode = "";
+        let activeKabCode = "";
+        let activeKecCode = "";
 
         // Skema Warna Wilayah Terang Estetik
-        var colors = ["#e5c158", "#00a896", "#3388ff", "#9b59b6", "#e74c3c", "#1abc9c", "#e67e22", "#2ecc71"];
+        const colors = ["#e5c158", "#00a896", "#3388ff", "#9b59b6", "#e74c3c", "#1abc9c", "#e67e22", "#2ecc71"];
         function getColor(str) {
-            var hash = 0;
+            let hash = 0;
             if (!str) return colors[0];
-            for (var i = 0; i < str.length; i++) {
+            for (let i = 0; i < str.length; i++) {
                 hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
             return colors[Math.abs(hash) % colors.length];
@@ -176,7 +177,7 @@
         // SISTEM LOAD OVERLAY GARIS BATAS KABUPATEN
         // ==========================================
         function loadBatasKabupaten() {
-            var batasStyle = {
+            const batasStyle = {
                 color: "#2C3E50",       
                 weight: 3.5,            
                 opacity: 0.95,          
@@ -188,7 +189,7 @@
                 .then(res => res.json())
                 .then(data => {
                     batasKabupatenGroup.clearLayers();
-                    var geojsonBatas = L.geoJSON(data, { style: batasStyle });
+                    const geojsonBatas = L.geoJSON(data, { style: batasStyle });
                     batasKabupatenGroup.addLayer(geojsonBatas);
                 })
                 .catch(err => console.error("Gagal memuat batas kabupaten luar:", err));
@@ -204,23 +205,24 @@
             currentLevel = 'provinsi';
             document.getElementById('back-btn').style.display = 'none';
             resetDropdowns(1);
+            tematikKesehatanGroup.clearLayers();
 
             if (geojsonLayer) map.removeLayer(geojsonLayer);
 
-            fetch('/api/kabupaten')
+            fetch('/api/wilayah/kabupaten')
                 .then(res => res.json())
                 .then(data => {
                     geojsonLayer = L.geoJSON(data, {
                         style: styleKabupatenDefault,
                         onEachFeature: function (feature, layer) {
-                            var kabName = feature.properties.nama_kab; 
-                            var kabCode = feature.properties.kode_kab; 
+                            const kabName = feature.properties.nama_kab; 
+                            const kabCode = feature.properties.kode_kab; 
                             
                             layer.bindTooltip(`<b>${kabName}</b>`, { sticky: true });
                             
                             layer.on({
                                 mouseover: function (e) {
-                                    var activeLayer = e.target;
+                                    const activeLayer = e.target;
                                     activeLayer.setStyle({
                                         weight: 4,
                                         color: "#1ABC9C", 
@@ -252,17 +254,18 @@
             currentLevel = 'kabupaten';
             document.getElementById('back-btn').style.display = 'flex';
             resetDropdowns(2);
+            tematikKesehatanGroup.clearLayers();
 
             if (geojsonLayer) map.removeLayer(geojsonLayer);
 
-            fetch(`/api/kecamatan/${kabCode}`)
+            fetch(`/api/wilayah/kecamatan/${kabCode}`)
                 .then(res => res.json())
                 .then(data => {
                     geojsonLayer = L.geoJSON(data, {
                         style: styleKecamatanDefault,
                         onEachFeature: function (feature, layer) {
-                            var kecName = feature.properties.nama_kec; 
-                            var kecCode = feature.properties.kode_kec; 
+                            const kecName = feature.properties.nama_kec; 
+                            const kecCode = feature.properties.kode_kec; 
                             
                             layer.bindTooltip(`<b>Kecamatan ${kecName}</b>`, { sticky: true });
                             
@@ -286,7 +289,7 @@
                         }
                     }).addTo(map);
 
-                    var bounds = geojsonLayer.getBounds();
+                    const bounds = geojsonLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
 
                     populateKecamatanDropdown(data);
@@ -295,15 +298,16 @@
         }
 
         // ==========================================
-        // LEVEL 3: KECAMATAN (Menampilkan Detail Desa & Kesehatan)
+        // LEVEL 3: KECAMATAN (Menampilkan Detail Desa Standar)
         // ==========================================
         function renderLevelKecamatan(kecCode) {
             currentLevel = 'kecamatan';
             document.getElementById('back-btn').style.display = 'flex';
+            tematikKesehatanGroup.clearLayers();
 
             if (geojsonLayer) map.removeLayer(geojsonLayer);
 
-            fetch(`/api/desa/${kecCode}`)
+            fetch(`/api/wilayah/desa/${kecCode}`)
                 .then(res => res.json())
                 .then(data => {
                     geojsonLayer = L.geoJSON(data, {
@@ -314,64 +318,25 @@
                             fillOpacity: 0.1
                         },
                         onEachFeature: function (feature, layer) {
-                            var desaName = feature.properties.nama_desa; 
-                            var desaCode = feature.properties.kode_desa;
-                            var listMedis = feature.properties.data_kesehatan; 
+                            const desaName = feature.properties.nama_desa; 
+                            const desaCode = feature.properties.kode_desa;
 
                             layer.bindTooltip(desaName, { permanent: true, direction: "center", className: "map-label" });
                             
                             layer.on('click', function () {
-                                var kontenMedis = "";
-                                if (listMedis && listMedis.length > 0) {
-                                    kontenMedis = `
-                                        <table style="width:100%; font-size:11px; margin-top:8px; border-collapse: collapse;">
-                                            <tr style="background:#f4f7f6; text-align:left;">
-                                                <th style="padding:5px; border-bottom:1px solid #ddd; color:#444;">Tenaga Medis</th>
-                                                <th style="padding:5px; border-bottom:1px solid #ddd; text-align:center; color:#444;">Jumlah</th>
-                                            </tr>`;
-                                    listMedis.forEach(item => {
-                                        kontenMedis += `
-                                            <tr>
-                                                <td style="padding:5px; border-bottom:1px solid #eee; color:#555;">
-                                                    ${item.jenis} <span style="font-size:9px; color:#888;">(${item.status})</span>
-                                                </td>
-                                                <td style="padding:5px; border-bottom:1px solid #eee; text-align:center; font-weight:bold; color:#028090;">
-                                                    ${item.jumlah}
-                                                </td>
-                                            </tr>`;
-                                    });
-                                    kontenMedis += `</table>`;
-                                } else {
-                                    kontenMedis = `
-                                        <div style="background: #fdfefe; border: 1px dashed #ddd; border-radius: 6px; padding: 10px; margin-top: 8px; text-align: center;">
-                                            <i class="fa-solid fa-triangle-exclamation" style="color: #e67e22; font-size: 14px; margin-bottom: 4px;"></i>
-                                            <p style="font-size:11px; color:#7f8c8d; margin: 0;">Data tenaga kesehatan belum tersedia.</p>
-                                        </div>`;
-                                }
-
-                                var popupContent = `
-                                    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 240px; padding: 4px;">
+                                const popupContent = `
+                                    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 200px; padding: 4px;">
                                         <h4 style="margin: 0 0 2px 0; color: #028090; font-size: 14px; text-align: center;">${desaName}</h4>
                                         <p style="margin: 0; font-size: 10px; color: #7f8c8d; text-align: center;">Kode: ${desaCode}</p>
                                         <hr style="border: 0; border-top: 1px solid #eee; margin: 8px 0;">
-                                        
-                                        <div style="display: flex; align-items: center; gap: 6px; color:#2c3e50; font-size:11px; font-weight: bold;">
-                                            <i class="fa-solid fa-notes-medical" style="color:#e74c3c;"></i>
-                                            <span>Fasilitas & Tenaga Medis</span>
-                                        </div>
-                                        ${kontenMedis}
-                                        
-                                        <div style="text-align: center; margin-top: 10px;">
-                                            <span style="font-size: 9px; background: #eef9f6; color: #00a896; padding: 3px 8px; border-radius: 20px; font-weight: bold;">Batas Desa Terdaftar</span>
-                                        </div>
-                                    </div>
-                                `;
+                                        <p style="font-size:11px; text-align:center; color:#555;">Gunakan menu <b>Data Tematik -> Kesehatan</b> di sebelah kiri untuk melihat persebaran jumlah tenaga medis.</p>
+                                    </div>`;
                                 layer.bindPopup(popupContent).openPopup();
                             });
                         }
                     }).addTo(map);
 
-                    var bounds = geojsonLayer.getBounds();
+                    const bounds = geojsonLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
 
                     populateDesaDropdown(data);
@@ -380,13 +345,104 @@
         }
 
         // ==========================================
+        // MENU DATA TEMATIK: KESEHATAN DESA
+        // ==========================================
+        function loadTematikKesehatan(e) {
+            if(e) e.preventDefault();
+            
+            const kecamatanCode = document.getElementById('select-kecamatan').value;
+            if(!kecamatanCode) {
+                alert('Silakan pilih Wilayah Kabupaten dan Kecamatan terlebih dahulu di dropdown filter atas!');
+                return;
+            }
+
+            tematikKesehatanGroup.clearLayers();
+            if (geojsonLayer) map.removeLayer(geojsonLayer);
+
+            fetch(`/api/wilayah/kesehatan/${kecamatanCode}`)
+                .then(res => res.json())
+                .then(geojsonData => {
+                    const healthLayer = L.geoJSON(geojsonData, {
+                        style: function(feature) {
+                            const hasData = feature.properties.data_kesehatan && feature.properties.data_kesehatan.length > 0;
+                            return {
+                                fillColor: hasData ? '#22c55e' : '#cbd5e1', 
+                                weight: 1.5,
+                                opacity: 1,
+                                color: '#ffffff',
+                                fillOpacity: 0.65
+                            };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const desaName = feature.properties.nama_desa;
+                            const desaCode = feature.properties.kode_desa;
+                            const listMedis = feature.properties.data_kesehatan;
+
+                            layer.bindTooltip(desaName, { permanent: true, direction: "center", className: "map-label" });
+                            
+                            let kontenMedis = "";
+                            if (listMedis && listMedis.length > 0) {
+                                kontenMedis = `
+                                    <table style="width:100%; font-size:11px; margin-top:8px; border-collapse: collapse;">
+                                        <tr style="background:#f4f7f6; text-align:left;">
+                                            <th style="padding:5px; border-bottom:1px solid #ddd; color:#444;">Tenaga Medis</th>
+                                            <th style="padding:5px; border-bottom:1px solid #ddd; text-align:center; color:#444;">Jumlah</th>
+                                        </tr>`;
+                                listMedis.forEach(item => {
+                                    kontenMedis += `
+                                        <tr>
+                                            <td style="padding:5px; border-bottom:1px solid #eee; color:#555;">
+                                                ${item.jenis_tenaga_medis} <span style="font-size:9px; color:#888;">(${item.status})</span>
+                                            </td>
+                                            <td style="padding:5px; border-bottom:1px solid #eee; text-align:center; font-weight:bold; color:#028090;">
+                                                ${item.jumlah_personil}
+                                            </td>
+                                        </tr>`;
+                                });
+                                kontenMedis += `</table>`;
+                            } else {
+                                kontenMedis = `
+                                    <div style="background: #fdfefe; border: 1px dashed #ddd; border-radius: 6px; padding: 10px; margin-top: 8px; text-align: center;">
+                                        <i class="fa-solid fa-triangle-exclamation" style="color: #e67e22; font-size: 14px; margin-bottom: 4px;"></i>
+                                        <p style="font-size:11px; color:#7f8c8d; margin: 0;">Data tenaga kesehatan belum tersedia.</p>
+                                    </div>`;
+                            }
+
+                            const popupContent = `
+                                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 250px; padding: 4px;">
+                                    <h4 style="margin: 0 0 2px 0; color: #028090; font-size: 14px; text-align: center;">${desaName}</h4>
+                                    <p style="margin: 0; font-size: 10px; color: #7f8c8d; text-align: center;">Kode: ${desaCode}</p>
+                                    <hr style="border: 0; border-top: 1px solid #eee; margin: 8px 0;">
+                                    
+                                    <div style="display: flex; align-items: center; gap: 6px; color:#2c3e50; font-size:11px; font-weight: bold;">
+                                        <i class="fa-solid fa-notes-medical" style="color:#e74c3c;"></i>
+                                        <span>Fasilitas & Tenaga Medis</span>
+                                    </div>
+                                    ${kontenMedis}
+                                </div>`;
+                                
+                            layer.bindPopup(popupContent);
+                        }
+                    });
+                    
+                    tematikKesehatanGroup.addLayer(healthLayer);
+                    const bounds = healthLayer.getBounds();
+                    if(bounds.isValid()) map.fitBounds(bounds);
+                })
+                .catch(error => {
+                    console.error('Error fetching data kesehatan tematik:', error);
+                    alert('Gagal memuat visualisasi sebaran data kesehatan.');
+                });
+        }
+
+        // ==========================================
         // SINKRONISASI DROPDOWN DARI DATA API
         // ==========================================
         function populateKabupatenDropdown(data) {
-            var select = document.getElementById('select-kabupaten');
+            const select = document.getElementById('select-kabupaten');
             select.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
             data.features.forEach(f => {
-                var opt = document.createElement('option');
+                const opt = document.createElement('option');
                 opt.value = f.properties.kode_kab;   
                 opt.innerHTML = f.properties.nama_kab; 
                 select.appendChild(opt);
@@ -394,11 +450,11 @@
         }
 
         function populateKecamatanDropdown(data) {
-            var select = document.getElementById('select-kecamatan');
+            const select = document.getElementById('select-kecamatan');
             select.innerHTML = '<option value="">Pilih Kecamatan</option>';
             select.disabled = false;
             data.features.forEach(f => {
-                var opt = document.createElement('option');
+                const opt = document.createElement('option');
                 opt.value = f.properties.kode_kec;   
                 opt.innerHTML = f.properties.nama_kec; 
                 select.appendChild(opt);
@@ -406,11 +462,11 @@
         }
 
         function populateDesaDropdown(data) {
-            var select = document.getElementById('select-desa');
+            const select = document.getElementById('select-desa');
             select.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
             select.disabled = false;
             data.features.forEach(f => {
-                var opt = document.createElement('option');
+                const opt = document.createElement('option');
                 opt.value = f.properties.kode_desa;   
                 opt.innerHTML = f.properties.nama_desa; 
                 select.appendChild(opt);
@@ -429,10 +485,20 @@
                 activeKecCode = value;
                 renderLevelKecamatan(value);
             } else if (level === 'desa') {
-                var targetLayer = geojsonLayer.getLayers().find(layer => layer.feature.properties.kode_desa === value);
-                if (targetLayer) {
-                    map.fitBounds(targetLayer.getBounds());
-                    targetLayer.fire('click');
+                let layerTarget = null;
+                
+                // Cari target di layer standar maupun layer kesehatan aktif
+                if (map.hasLayer(geojsonLayer)) {
+                    layerTarget = geojsonLayer.getLayers().find(layer => layer.feature.properties.kode_desa === value);
+                } else {
+                    tematikKesehatanGroup.eachLayer(function(group) {
+                        layerTarget = group.getLayers().find(layer => layer.feature.properties.kode_desa === value);
+                    });
+                }
+
+                if (layerTarget) {
+                    map.fitBounds(layerTarget.getBounds());
+                    layerTarget.fire('click');
                 }
             }
         }
@@ -452,6 +518,7 @@
         function goBack() {
             if (currentLevel === 'kecamatan') {
                 renderLevelKabupaten(activeKabCode);
+                document.getElementById('select-kabupaten').value = activeKabCode;
             } else if (currentLevel === 'kabupaten') {
                 initMapProvinsi();
                 map.setView([-4.85, 105.0], 9);

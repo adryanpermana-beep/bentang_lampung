@@ -5,13 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Wilayah; // Mengimpor model Wilayah dari namespace App
 
 class GeoJsonController extends Controller
 {
     /**
      * Mengambil seluruh kabupaten/kota khusus Provinsi Lampung (Kode awalan '18')
-     * langsung dari database PostGIS dengan format GeoJSON yang presisi.
      */
     public function getKabupaten()
     {
@@ -22,8 +20,6 @@ class GeoJsonController extends Controller
                     nama AS nama_kab, 
                     geometry AS geom
                 FROM master_data.wilayah
-                -- Panjang kode 4 digit adalah level Kabupaten/Kota
-                -- Awalan '18' membatasi hanya wilayah di Provinsi Lampung
                 WHERE LENGTH(kode) = 4 
                   AND kode LIKE '18%' 
             )
@@ -38,19 +34,12 @@ class GeoJsonController extends Controller
 
         try {
             $result = DB::select($query);
-            
             if (empty($result) || !$result[0]->geojson) {
-                return response()->json([
-                    'type' => 'FeatureCollection',
-                    'features' => []
-                ]);
+                return response()->json(['type' => 'FeatureCollection', 'features' => []]);
             }
-
             return response()->json(json_decode($result[0]->geojson));
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal memproses data spasial kabupaten: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Gagal memproses data kabupaten: ' . $e->getMessage()], 500);
         }
     }
 
@@ -77,19 +66,12 @@ class GeoJsonController extends Controller
 
         try {
             $result = DB::select($query, ['kabupaten_code' => $kabupaten_code]);
-            
             if (empty($result) || !$result[0]->geojson) {
-                return response()->json([
-                    'type' => 'FeatureCollection',
-                    'features' => []
-                ]);
+                return response()->json(['type' => 'FeatureCollection', 'features' => []]);
             }
-
             return response()->json(json_decode($result[0]->geojson));
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal memproses data kecamatan: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Gagal memproses data kecamatan: ' . $e->getMessage()], 500);
         }
     }
 
@@ -116,24 +98,64 @@ class GeoJsonController extends Controller
 
         try {
             $result = DB::select($query, ['kecamatan_code' => $kecamatan_code]);
-            
             if (empty($result) || !$result[0]->geojson) {
-                return response()->json([
-                    'type' => 'FeatureCollection',
-                    'features' => []
-                ]);
+                return response()->json(['type' => 'FeatureCollection', 'features' => []]);
             }
-
             return response()->json(json_decode($result[0]->geojson));
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal memproses data desa: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Gagal memproses data desa: ' . $e->getMessage()], 500);
         }
     }
 
     /**
-     * Batas Kabupaten Terluar (Dissolve & Boundary) untuk garis overlay merah/hitam tebal di peta
+     * Mengambil data spasial desa sekaligus JOIN dengan data dari schema kesehatan
+     */
+    public function getKesehatan($kecamatan_code)
+    {
+        $query = "
+            SELECT json_build_object(
+                'type', 'FeatureCollection',
+                'features', json_agg(ST_AsGeoJSON(t.*)::json)
+            ) as geojson
+            FROM (
+                SELECT 
+                    w.kode AS kode_desa,
+                    w.nama AS nama_desa,
+                    w.geometry,
+                    COALESCE(
+                        jsonb_agg(
+                            jsonb_build_object(
+                                'provinsi', k.provinsi,
+                                'kabupaten_kota', k.kabupaten_kota,
+                                'kecamatan', k.kecamatan,
+                                'status', k.status,
+                                'jenis_tenaga_medis', k.jenis_tenaga_medis,
+                                'jumlah_personil', k.jumlah_personil,
+                                'tanggal_data', k.tanggal_data
+                            )
+                        ) FILTER (WHERE k.kode_desa IS NOT NULL), '[]'::jsonb
+                    ) AS data_kesehatan
+                FROM master_data.wilayah w
+                LEFT JOIN kesehatan.tenaga_medis k ON w.kode = k.kode_desa
+                WHERE LENGTH(w.kode) = 10 
+                  AND SUBSTRING(w.kode FROM 1 FOR 6) = :kecamatan_code
+                GROUP BY w.kode, w.nama, w.geometry
+            ) AS t;
+        ";
+
+        try {
+            $result = DB::select($query, ['kecamatan_code' => $kecamatan_code]);
+            if (empty($result) || !$result[0]->geojson) {
+                return response()->json(['type' => 'FeatureCollection', 'features' => []]);
+            }
+            return response()->json(json_decode($result[0]->geojson));
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal memproses data tematik kesehatan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Batas Kabupaten Terluar (Dissolve & Boundary)
      */
     public function getBatasKabupaten()
     {
@@ -160,9 +182,7 @@ class GeoJsonController extends Controller
             $result = DB::select($query);
             return response()->json(json_decode($result[0]->geojson));
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal memproses garis batas luar: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Gagal memproses garis batas luar: ' . $e->getMessage()], 500);
         }
     }
 }
