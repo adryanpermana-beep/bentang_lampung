@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // =========================================================================
-// ROUTE API DRILLDOWN PETA LAMPUNG (FORMAT KLASIK LARAVEL)
+// ROUTE API DRILLDOWN PETA LAMPUNG (Namespace sudah disesuaikan dengan RouteServiceProvider)
 // =========================================================================
 
 // 1. Ambil seluruh Kabupaten se-Lampung
@@ -26,8 +26,14 @@ Route::get('/wilayah/kecamatan/{kabupaten_code}', 'API\GeoJsonController@getKeca
 // 3. Ambil Desa berdasarkan Kode Kecamatan
 Route::get('/wilayah/desa/{kecamatan_code}', 'API\GeoJsonController@getDesa');
 
-// 4. Ambil Tematik Data Kesehatan Desa berdasarkan Kode Kecamatan
+// 4. Ambil Tematik Data Kesehatan Desa (Tenaga Medis) berdasarkan Kode Kecamatan
 Route::get('/wilayah/kesehatan/{kecamatan_code}', 'API\GeoJsonController@getKesehatan');
 
-// 5. Garis batas luar terluar kabupaten
+// 5. Ambil Tematik Data Sumber Air Bersih berdasarkan Kode Kecamatan
+Route::get('/wilayah/air-bersih/{kecamatan_code}', 'API\GeoJsonController@getAirBersih');
+
+// 6. Ambil Tematik Data Sanitasi berdasarkan Kode Kecamatan
+Route::get('/wilayah/sanitasi/{kecamatan_code}', 'API\GeoJsonController@getSanitasi');
+
+// 7. Garis batas luar terluar kabupaten
 Route::get('/batas-kabupaten', 'API\GeoJsonController@getBatasKabupaten');
