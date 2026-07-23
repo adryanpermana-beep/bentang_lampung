@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Wilayah;
+use App\Http\Controllers\ProduksiController;
+use App\Http\Controllers\ProduksiApotikHidupController;
+use App\Http\Controllers\ProduksiBahanGalianController; // <-- 1. Impor controller baru
 
 /*
 |--------------------------------------------------------------------------
@@ -54,7 +57,7 @@ Route::get('/profil-desa/{kode_desa}', function ($kode_desa) {
             if (isset($wilayah->latitude))      $latitude      = $wilayah->latitude;
             if (isset($wilayah->longitude))     $longitude     = $wilayah->longitude;
 
-            // === 🌐 REVERSE GEOCODING OTOMATIS (MENGGUNAKAN CURL) ===
+            // === REVERSE GEOCODING OTOMATIS (MENGGUNAKAN CURL) ===
             if (empty($kode_pos) && !empty($latitude) && !empty($longitude)) {
                 try {
                     $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&addressdetails=1";
@@ -86,7 +89,7 @@ Route::get('/profil-desa/{kode_desa}', function ($kode_desa) {
                 }
             }
 
-            // === 💡 FALLBACK KODE POS DEFAULT JIKA API OSM TIDAK MENEMUKAN DATA ===
+            // === FALLBACK KODE POS DEFAULT ===
             if (empty($kode_pos)) {
                 $prefix_kab = substr($kode_desa, 0, 4);
                 
@@ -121,10 +124,10 @@ Route::get('/profil-desa/{kode_desa}', function ($kode_desa) {
             }
         }
     } catch (\Exception $e) {
-        // Biarkan menggunakan nilai default jika terjadi kendala DB
+        // Biarkan menggunakan nilai default
     }
 
-    // 4. Deteksi Logo Kabupaten Dinamis (Mendukung .png dan .jpg)
+    // 4. Deteksi Logo Kabupaten Dinamis
     $kode_kab = substr($kode_desa, 0, 4);
     $path_png = 'images/logo/' . $kode_kab . '.png';
     $path_jpg = 'images/logo/' . $kode_kab . '.jpg';
@@ -139,15 +142,15 @@ Route::get('/profil-desa/{kode_desa}', function ($kode_desa) {
 
     // 5. Kirimkan seluruh data ke profil-desa.blade.php
     return view('profil-desa', [
-        'kode_desa'     => $kode_desa,
-        'nama_kab'      => $nama_kab,
-        'nama_kec'      => $nama_kec,
-        'nama_desa'     => $nama_desa,
-        'logo_kab'      => $logo_kab,
-        'luas_wilayah'  => $luas_wilayah,
-        'kode_pos'      => $kode_pos,
-        'latitude'      => $latitude,
-        'longitude'     => $longitude,
+        'kode_desa'    => $kode_desa,
+        'nama_kab'     => $nama_kab,
+        'nama_kec'     => $nama_kec,
+        'nama_desa'    => $nama_desa,
+        'logo_kab'     => $logo_kab,
+        'luas_wilayah' => $luas_wilayah,
+        'kode_pos'     => $kode_pos,
+        'latitude'     => $latitude,
+        'longitude'    => $longitude,
     ]);
 });
 
@@ -163,6 +166,16 @@ Route::get('/api/wilayah/kependudukan/kesejahteraan/{kode_kecamatan}', 'API\Kepe
 Route::get('/api/wilayah/kependudukan/mata-pencaharian/{kode_kecamatan}', 'API\KependudukanController@getMataPencaharian');
 Route::get('/api/wilayah/kependudukan/tenaga-kerja/{kode_kecamatan}', 'API\KependudukanController@getTenagaKerja');
 Route::get('/api/wilayah/kependudukan/tingkat-pendidikan/{kode_kecamatan}', 'API\KependudukanController@getTingkatPendidikan');
+
+// === API TEMATIK PRODUKSI ===
+// Special Route untuk Apotik Hidup (Menuju ProduksiApotikHidupController)
+Route::get('/api/tematik/produksi/apotik-hidup/{kode_kecamatan}', 'ProduksiApotikHidupController@getGeojson');
+
+// Special Route untuk Bahan Galian (Menuju ProduksiBahanGalianController) <-- 2. Tambah Rute Ini
+Route::get('/api/tematik/produksi/bahan-galian/{kode_kecamatan}', 'ProduksiBahanGalianController@getGeojson');
+
+// Route Generik untuk Kategori Produksi Lainnya (Pertanian, Perikanan, Peternakan, dll)
+Route::get('/api/tematik/produksi/{kategori}/{kode_kecamatan}', 'ProduksiController@getProduksiData');
 
 // === FITUR LOGIN ADMIN ===
 Route::group(['middleware' => ['web']], function () {

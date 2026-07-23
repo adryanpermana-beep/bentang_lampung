@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // =========================================================================
-// ROUTE API DRILLDOWN PETA LAMPUNG (Namespace sudah disesuaikan dengan RouteServiceProvider)
+// ROUTE API DRILLDOWN PETA LAMPUNG
 // =========================================================================
 
 // 1. Ambil seluruh Kabupaten se-Lampung

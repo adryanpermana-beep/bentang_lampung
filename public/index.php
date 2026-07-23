@@ -1,5 +1,7 @@
 <?php
-
+// Tambahkan baris ini di paling atas
+ini_set('memory_limit', '1024M');
+set_time_limit(0);
 /**
  * Laravel - A PHP Framework For Web Artisans
  *
