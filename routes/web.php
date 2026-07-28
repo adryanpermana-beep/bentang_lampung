@@ -5,7 +5,15 @@ use Illuminate\Support\Facades\DB;
 use App\Wilayah;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ProduksiApotikHidupController;
-use App\Http\Controllers\ProduksiBahanGalianController; // <-- 1. Impor controller baru
+use App\Http\Controllers\ProduksiBahanGalianController;
+use App\Http\Controllers\ProduksiBuahBuahanController;
+use App\Http\Controllers\ProduksiBudiDayaAirTawarController;
+use App\Http\Controllers\ProduksiHasilHutanController;
+use App\Http\Controllers\ProduksiHasilTangkapanController;
+use App\Http\Controllers\ProduksiPerkebunanController;
+use App\Http\Controllers\ProduksiPeternakanController;
+use App\Http\Controllers\ProduksiTanamanPanganController; // <-- Impor Controller Tanaman Pangan
+use App\Http\Controllers\AdminLoginController; // <-- Impor AdminLoginController
 
 /*
 |--------------------------------------------------------------------------
@@ -168,18 +176,42 @@ Route::get('/api/wilayah/kependudukan/tenaga-kerja/{kode_kecamatan}', 'API\Kepen
 Route::get('/api/wilayah/kependudukan/tingkat-pendidikan/{kode_kecamatan}', 'API\KependudukanController@getTingkatPendidikan');
 
 // === API TEMATIK PRODUKSI ===
-// Special Route untuk Apotik Hidup (Menuju ProduksiApotikHidupController)
+// Special Route untuk Apotik Hidup
 Route::get('/api/tematik/produksi/apotik-hidup/{kode_kecamatan}', 'ProduksiApotikHidupController@getGeojson');
 
-// Special Route untuk Bahan Galian (Menuju ProduksiBahanGalianController) <-- 2. Tambah Rute Ini
+// Special Route untuk Bahan Galian
 Route::get('/api/tematik/produksi/bahan-galian/{kode_kecamatan}', 'ProduksiBahanGalianController@getGeojson');
 
-// Route Generik untuk Kategori Produksi Lainnya (Pertanian, Perikanan, Peternakan, dll)
+// Special Route untuk Buah-Buahan
+Route::get('/api/tematik/produksi/buah-buahan/{kode_kecamatan}', 'ProduksiBuahBuahanController@getGeojson');
+
+// Special Route untuk Budi Daya Air Tawar
+Route::get('/api/tematik/produksi/budi-daya-air-tawar/{kode_kecamatan}', 'ProduksiBudiDayaAirTawarController@getGeojson');
+
+// Special Route untuk Hasil Hutan
+Route::get('/api/tematik/produksi/hasil-hutan/{kode_kecamatan}', 'ProduksiHasilHutanController@getGeojson');
+
+// Special Route untuk Hasil Tangkapan
+Route::get('/api/tematik/produksi/hasil-tangkapan/{kode_kecamatan}', 'ProduksiHasilTangkapanController@getGeojson');
+
+// Special Route untuk Perkebunan
+Route::get('/api/tematik/produksi/perkebunan/{kode_kecamatan}', 'ProduksiPerkebunanController@getGeojson');
+
+// Special Route untuk Peternakan
+Route::get('/api/tematik/produksi/peternakan/{kode_kecamatan}', 'ProduksiPeternakanController@getGeojson');
+
+// Special Route untuk Tanaman Pangan
+Route::get('/api/tematik/produksi/tanaman-pangan/{kode_kecamatan}', 'ProduksiTanamanPanganController@getGeojson');
+
+// Route Generik untuk Kategori Produksi Lainnya
 Route::get('/api/tematik/produksi/{kategori}/{kode_kecamatan}', 'ProduksiController@getProduksiData');
 
-// === FITUR LOGIN ADMIN ===
+// === FITUR LOGIN ADMIN & PETA ADMIN ===
 Route::group(['middleware' => ['web']], function () {
-    Route::get('/halaman-login', 'AdminLoginController@showForm');
-    Route::post('/masuk-admin', 'AdminLoginController@prosesLogin');
-    Route::post('/keluar-admin', 'AdminLoginController@prosesLogout');
+    Route::get('/halaman-login', 'AdminLoginController@showForm')->name('login');
+    Route::post('/masuk-admin', 'AdminLoginController@prosesLogin')->name('admin.login');
+    Route::post('/keluar-admin', 'AdminLoginController@prosesLogout')->name('admin.logout');
+    
+    // Route Khusus Tampilan Peta Admin
+    Route::get('/admin/peta', 'AdminLoginController@adminPeta')->name('admin.peta');
 });

@@ -59,14 +59,12 @@
             color: #2c3e50;
             box-shadow: 0 1px 5px rgba(0,0,0,0.2);
         }
-
         /* CSS UNIFORM SEMUA MENU TEMATIK */
         .menu-tematik-group {
             margin: 0 !important;
             padding: 0 !important;
             width: 100%;
         }
-
         .tematik-main-item {
             display: flex;
             align-items: center;
@@ -77,16 +75,13 @@
             transition: background-color 0.2s ease;
             user-select: none;
         }
-
         .tematik-main-item:hover {
             background-color: #f1f5f9;
         }
-
         .tematik-title-wrapper {
             display: flex;
             align-items: center;
         }
-
         .tematik-icon-box {
             width: 24px;
             display: inline-flex;
@@ -96,19 +91,16 @@
             font-size: 15px;
             color: #475569;
         }
-
         .tematik-label {
             font-size: 14px;
             font-weight: 500;
             color: #334155;
         }
-
         .tematik-arrow-icon {
             font-size: 12px;
             color: #94a3b8;
             transition: transform 0.3s ease;
         }
-
         .tematik-submenu-box {
             display: none;
             padding-left: 34px;
@@ -116,7 +108,6 @@
             flex-direction: column;
             gap: 4px;
         }
-
         .tematik-sub-item {
             display: flex;
             align-items: center;
@@ -131,14 +122,12 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-
         .tematik-sub-item:hover {
             background-color: #eff6ff;
             color: #1e3a8a;
             border-color: #bfdbfe;
             transform: translateX(2px);
         }
-
         .tematik-sub-item i {
             width: 18px;
             text-align: center;
@@ -323,20 +312,20 @@
 
             <!-- 5. LAPANGAN PEKERJAAN -->
             <li class="menu-tematik-group">
-                <div class="tematik-main-item" onclick="toggleTematikSubmenu('pekerjaan', this)">
-                    <div class="tematik-title-wrapper">
-                        <span class="tematik-icon-box"><i class="fa-solid fa-briefcase"></i></span>
-                        <span class="tematik-label">Lapangan Pekerjaan</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-right tematik-arrow-icon"></i>
-                </div>
-                <div id="submenu-pekerjaan" class="tematik-submenu-box">
-                    <a href="https://id.jobstreet.com/id/jobs/in-Lampung" target="_blank" class="tematik-sub-item">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        <span>Lihat Lowongan</span>
-                    </a>
-                </div>
-            </li>
+    <div class="tematik-main-item" onclick="toggleTematikSubmenu('pekerjaan', this)">
+        <div class="tematik-title-wrapper">
+            <span class="tematik-icon-box"><i class="fa-solid fa-briefcase"></i></span>
+            <span class="tematik-label">Lapangan Pekerjaan</span>
+        </div>
+        <i class="fa-solid fa-chevron-right tematik-arrow-icon"></i>
+    </div>
+    <div id="submenu-pekerjaan" class="tematik-submenu-box">
+        <div class="tematik-sub-item" onclick="bukaModalLowongan('https://sigajahkerja.disnaker.lampungprov.go.id/lowongan')" style="cursor: pointer;">
+            <i class="fa-solid fa-window-maximize"></i>
+            <span>Lihat Lowongan</span>
+        </div>
+    </div>
+</li>
         </ul>
     </div>
 
@@ -352,21 +341,17 @@
         // INISIALISASI MAP
         const map = L.map('map', { zoomControl: false }).setView([-4.85, 105.0], 9);
         L.control.zoom({ position: 'topright' }).addTo(map);
-
         // BASEMAP SATELIT & OSM
         const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             attribution: '&copy; Google Maps'
         }).addTo(map);
-
         const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
         // LAYER GROUPS
         const batasKabupatenGroup = L.layerGroup().addTo(map);
         const tematikKesehatanGroup = L.layerGroup().addTo(map);
         const tematikUmumGroup = L.layerGroup().addTo(map); 
         const tematikKependudukanGroup = L.layerGroup().addTo(map);
         const tematikProduksiGroup = L.layerGroup().addTo(map);
-
         L.control.layers(
             { "Satelit": satelliteLayer, "Peta Jalan": openStreetMap }, 
             { 
@@ -378,13 +363,11 @@
             }, 
             { position: 'topright' }
         ).addTo(map);
-
         // STATE NAVIGASI
         let geojsonLayer;
         let currentLevel = 'provinsi'; 
         let activeKabCode = "";
         let activeKecCode = "";
-
         // SKEMA WARNA WILAYAH
         const colors = ["#e5c158", "#00a896", "#3388ff", "#9b59b6", "#e74c3c", "#1abc9c", "#e67e22", "#2ecc71"];
         function getColor(str) {
@@ -395,15 +378,12 @@
             }
             return colors[Math.abs(hash) % colors.length];
         }
-
         const styleKabupatenDefault = function(feature) {
             return { color: "#2C3E50", weight: 2, fillColor: getColor(feature.properties.nama_kab), fillOpacity: 0.15 };
         };
-
         const styleKecamatanDefault = function(feature) {
             return { color: "#E74C3C", weight: 1.5, dashArray: "3, 3", fillColor: getColor(feature.properties.nama_kec), fillOpacity: 0.12 };
         };
-
         // FUNGSI LOAD BATAS KABUPATEN
         function loadBatasKabupaten() {
             const batasStyle = { color: "#2C3E50", weight: 3.5, opacity: 0.95, dashArray: "8, 6", interactive: false };
@@ -416,7 +396,6 @@
                 })
                 .catch(err => console.error("Gagal memuat batas kabupaten luar:", err));
         }
-
         // FUNGSI INITIALISASI MAP PROVINSI
         function initMapProvinsi() {
             currentLevel = 'provinsi';
@@ -424,9 +403,7 @@
             resetDropdowns(0);
             document.getElementById('select-kabupaten').value = "";
             clearAllTematikLayers();
-
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch('/api/wilayah/kabupaten')
                 .then(res => res.json())
                 .then(data => {
@@ -439,7 +416,7 @@
                             
                             layer.on({
                                 mouseover: function (e) {
-                                    e.target.setStyle({ weight: 4, color: "#1ABC9C", fillOpacity: 0.35 });
+                                    e.target.setStyle({ weight: 4, color: "#fa070f", fillOpacity: 0.35 });
                                     e.target.bringToFront();
                                 },
                                 mouseout: function (e) { geojsonLayer.resetStyle(e.target); },
@@ -459,16 +436,13 @@
                 })
                 .catch(err => console.error("Error loading kabupaten:", err));
         }
-
         // RENDER LEVEL KABUPATEN
         function renderLevelKabupaten(kabCode) {
             currentLevel = 'kabupaten';
             document.getElementById('back-btn').style.display = 'flex';
             resetDropdowns(2);
             clearAllTematikLayers();
-
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/wilayah/kecamatan/${kabCode}`)
                 .then(res => res.json())
                 .then(data => {
@@ -480,7 +454,7 @@
                             layer.bindTooltip(`<b>Kecamatan ${kecName}</b>`, { sticky: true });
                             
                             layer.on({
-                                mouseover: function (e) { e.target.setStyle({ weight: 3, color: "#E67E22", fillOpacity: 0.3 }); },
+                                mouseover: function (e) { e.target.setStyle({ weight: 3, color: "#e2fa08", fillOpacity: 0.3 }); },
                                 mouseout: function (e) { geojsonLayer.resetStyle(e.target); },
                                 click: function () {
                                     activeKecCode = kecCode;
@@ -490,27 +464,23 @@
                             });
                         }
                     }).addTo(map);
-
                     const bounds = geojsonLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
                     populateKecamatanDropdown(data);
                 })
                 .catch(err => console.error("Error loading kecamatan:", err));
         }
-
         // RENDER LEVEL KECAMATAN
         function renderLevelKecamatan(kecCode) {
             currentLevel = 'kecamatan';
             document.getElementById('back-btn').style.display = 'flex';
             clearAllTematikLayers();
-
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/wilayah/desa/${kecCode}`)
                 .then(res => res.json())
                 .then(data => {
                     geojsonLayer = L.geoJSON(data, {
-                        style: { color: "#3388ff", weight: 1.5, fillColor: "#3388ff", fillOpacity: 0.1 },
+                        style: { color: "#44ff33", weight: 1.5, fillColor: "#33ff58", fillOpacity: 0.1 },
                         onEachFeature: function (feature, layer) {
                             const desaName = feature.properties.nama_desa; 
                             const desaCode = feature.properties.kode_desa;
@@ -526,7 +496,6 @@
                                         <p style="font-size: 11px; text-align: center; color: #555; margin-bottom: 12px; line-height: 1.4;">
                                             Gunakan menu <b>Data Tematik</b> di sebelah kiri untuk melihat detail infografis desa ini.
                                         </p>
-
                                         <button onclick="bukaProfilDesa('${desaCode}', '${desaName}')" 
                                             style="width: 100%; background: #1e3a8a; color: white; border: none; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.2s;">
                                             <i class="fa-solid fa-id-card"></i> Profil Desa
@@ -536,14 +505,12 @@
                             });
                         }
                     }).addTo(map);
-
                     const bounds = geojsonLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
                     populateDesaDropdown(data);
                 })
                 .catch(err => console.error("Error loading desa:", err));
         }
-
         // FUNGSI BERSIHKAN LAYER TEMATIK
         function clearAllTematikLayers() {
             tematikKesehatanGroup.clearLayers();
@@ -551,7 +518,6 @@
             tematikKependudukanGroup.clearLayers();
             tematikProduksiGroup.clearLayers();
         }
-
         // FUNGSI TOGGLE ACCORDION SUBMENU TEMATIK
         function toggleTematikSubmenu(menuName, element) {
             var subMenu = document.getElementById('submenu-' + menuName);
@@ -569,7 +535,6 @@
                 setTimeout(() => { map.invalidateSize(); }, 200);
             }
         }
-
         // FUNGSI EKSPLISIT LOAD DATA PRODUKSI HASIL PERBAIKAN NAMA FILE
         function loadTematikProduksi(e, kategori) {
             if (e) e.stopPropagation();
@@ -585,7 +550,6 @@
                     console.log(`Endpoint API '/api/tematik/produksi/${kategori}' siap dihubungkan dengan backend Excel.`);
                 });
         }
-
         // FUNGSI NAVIGASI KEMBALI
         function goBack() {
             if (currentLevel === 'kecamatan') {
@@ -594,7 +558,6 @@
                 initMapProvinsi();
             }
         }
-
         // FUNGSI POPULATE DROPDOWN & FILTER
         function populateKabupatenDropdown(data) {
             const select = document.getElementById('select-kabupaten');
@@ -605,7 +568,6 @@
                 });
             }
         }
-
         function populateKecamatanDropdown(data) {
             const select = document.getElementById('select-kecamatan');
             select.disabled = false;
@@ -616,7 +578,6 @@
                 });
             }
         }
-
         function populateDesaDropdown(data) {
             const select = document.getElementById('select-desa');
             select.disabled = false;
@@ -627,7 +588,6 @@
                 });
             }
         }
-
         function resetDropdowns(level) {
             if (level <= 1) {
                 const kec = document.getElementById('select-kecamatan');
@@ -640,7 +600,6 @@
                 desa.disabled = true;
             }
         }
-
         function filterFromDropdown(level, value) {
             if (!value) return;
             if (level === 'kabupaten') {
@@ -660,25 +619,20 @@
                 }
             }
         }
-
   // STUB FUNGSI TEMATIK / PROFIL DESA
         function bukaProfilDesa(code, name) { console.log('Profil Desa:', code, name); }
         function loadTematikKesehatan(e) { if(e) e.stopPropagation(); console.log('Load Tematik Kesehatan'); }
         function loadTematikUmum(e, type) { if(e) e.stopPropagation(); console.log('Load Tematik Umum:', type); }
         function loadTematikKependudukan(e, type) { if(e) e.stopPropagation(); console.log('Load Tematik Kependudukan:', type); }
-
         // RUN AT STARTUP
         loadBatasKabupaten();
         initMapProvinsi();
-
-
         // ==========================================
         // FUNGSI AKSI TOMBOL PROFIL DESA
         // ==========================================
         function bukaProfilDesa(kodeDesa, namaDesa) {
             window.location.href = `/profil-desa/${kodeDesa}`;
         }
-
         // ==========================================
         // SUBMENU KESEHATAN 1: TENAGA MEDIS
         // ==========================================
@@ -689,12 +643,10 @@
                 alert('Silakan pilih Wilayah Kabupaten dan Kecamatan terlebih dahulu di dropdown filter atas!');
                 return;
             }
-
             tematikKesehatanGroup.clearLayers();
             tematikUmumGroup.clearLayers();
             tematikKependudukanGroup.clearLayers();
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/wilayah/kesehatan/${kecamatanCode}`)
                 .then(res => res.json())
                 .then(geojsonData => {
@@ -707,7 +659,6 @@
                             const desaName = feature.properties.nama_desa;
                             const desaCode = feature.properties.kode_desa;
                             const listMedis = feature.properties.data_kesehatan;
-
                             layer.bindTooltip(desaName, { permanent: true, direction: "center", className: "map-label" });
                             
                             let kontenMedis = "";
@@ -720,7 +671,6 @@
                             } else {
                                 kontenMedis = `<div style="background: #fdfefe; border: 1px dashed #ddd; border-radius: 6px; padding: 10px; margin-top: 8px; text-align: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #e67e22; font-size: 14px; margin-bottom: 4px;"></i><p style="font-size:11px; color:#7f8c8d; margin: 0;">Data tenaga kesehatan belum tersedia.</p></div>`;
                             }
-
                             const popupContent = `
                                 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 250px; padding: 4px;">
                                     <h4 style="margin: 0 0 2px 0; color: #028090; font-size: 14px; text-align: center;">${desaName}</h4>
@@ -739,7 +689,6 @@
                 })
                 .catch(error => { console.error('Error:', error); alert('Gagal memuat data kesehatan.'); });
         }
-
         // ==========================================
         // SUBMENU KESEHATAN 2 & 3: AIR BERSIH & SANITASI
         // ==========================================
@@ -750,12 +699,10 @@
                 alert('Silakan pilih Wilayah Kabupaten dan Kecamatan terlebih dahulu di dropdown filter atas!');
                 return;
             }
-
             tematikKesehatanGroup.clearLayers();
             tematikUmumGroup.clearLayers();
             tematikKependudukanGroup.clearLayers();
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/wilayah/${tipe}/${kecamatanCode}`)
                 .then(res => res.json())
                 .then(geojsonData => {
@@ -765,7 +712,8 @@
                             if (tipe === 'air-bersih') {
                                 hasData = feature.properties.data_air && feature.properties.data_air.length > 0;
                             } else if (tipe === 'sanitasi') {
-                                hasData = feature.properties.data_sanitasi && feature.properties.data_sanitasi.length > 0;
+                                hasData = feature.properties.data_sanitasi
+                                 && feature.properties.data_sanitasi.length > 0;
                             }
                             
                             let colorTheme = tipe === 'air-bersih' ? '#028090' : '#8e44ad';
@@ -775,7 +723,6 @@
                             const desaName = feature.properties.nama_desa;
                             const desaCode = feature.properties.kode_desa;
                             layer.bindTooltip(desaName, { permanent: true, direction: "center", className: "map-label" });
-
                             let detailHtml = "";
                             
                             if (tipe === 'air-bersih') {
@@ -805,7 +752,6 @@
                                     detailHtml += `<div style="background:#fdfefe; border:1px dashed #ddd; border-radius:6px; padding:10px; margin-top:8px; text-align:center; font-size:11px; color:#7f8c8d;">Data sanitasi belum tersedia.</div>`;
                                 }
                             }
-
                             const popupContent = `
                                 <div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width:250px; padding:4px;">
                                     <h4 style="margin:0 0 2px 0; color:#028090; font-size:14px; text-align:center;">${desaName}</h4>
@@ -816,14 +762,12 @@
                             layer.bindPopup(popupContent);
                         }
                     });
-
                     tematikUmumGroup.addLayer(dynamicLayer);
                     const bounds = dynamicLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
                 })
                 .catch(error => { console.error('Error:', error); alert('Gagal memuat data tematik wilayah.'); });
         }
-
         // ==========================================
         // SUBMENU KEPENDUDUKAN
         // ==========================================
@@ -834,12 +778,10 @@
                 alert('Silakan pilih Wilayah Kabupaten dan Kecamatan terlebih dahulu di dropdown filter atas!');
                 return;
             }
-
             tematikKesehatanGroup.clearLayers();
             tematikUmumGroup.clearLayers();
             tematikKependudukanGroup.clearLayers();
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/wilayah/kependudukan/${tipe}/${kecamatanCode}`)
                 .then(res => res.json())
                 .then(geojsonData => {
@@ -852,13 +794,11 @@
                             const desaName = feature.properties.nama_desa;
                             const desaCode = feature.properties.kode_desa;
                             const dataList = feature.properties.data_kependudukan || [];
-
                             layer.bindTooltip(desaName, { permanent: true, direction: "center", className: "map-label" });
                             
                             let detailHtml = "";
                             let iconTitle = "fa-users";
                             let titleLabel = "Data Kependudukan";
-
                             if (tipe === 'penduduk-kk') {
                                 iconTitle = "fa-users";
                                 titleLabel = "Penduduk dan KK";
@@ -889,7 +829,6 @@
                                         
                                         const totalSejahtera = item.keluarga_sejahtera || (ks1 + ks2 + ks3 + ks3Plus) || 0;
                                         const totalPrasejahtera = item.keluarga_prasejahtera || item.pra_ks || 0;
-
                                         detailHtml += `<tr><td style="padding:5px; border-bottom:1px solid #eee;">Keluarga Sejahtera I - III Plus</td><td style="padding:5px; border-bottom:1px solid #eee; text-align:center; font-weight:bold; color:#22c55e;">${totalSejahtera} KK</td></tr>`;
                                         detailHtml += `<tr><td style="padding:5px; border-bottom:1px solid #eee;">Keluarga Prasejahtera</td><td style="padding:5px; border-bottom:1px solid #eee; text-align:center; font-weight:bold; color:#ef4444;">${totalPrasejahtera} KK</td></tr>`;
                                         detailHtml += `<tr><td style="padding:5px; border-bottom:1px solid #eee; font-style:italic;">Total Terdata</td><td style="padding:5px; border-bottom:1px solid #eee; text-align:center; font-weight:bold;">${item.total_kk || 0} KK</td></tr>`;
@@ -932,11 +871,9 @@
                                     detailHtml += `</table>`;
                                 }
                             }
-
                             if (detailHtml === "") {
                                 detailHtml = `<div style="background: #fdfefe; border: 1px dashed #ddd; border-radius: 6px; padding: 10px; margin-top: 8px; text-align: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #e67e22; font-size: 14px; margin-bottom: 4px;"></i><p style="font-size:11px; color:#7f8c8d; margin: 0;">Data kategori ini belum tersedia.</p></div>`;
                             }
-
                             const popupContent = `
                                 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 290px; padding: 4px;">
                                     <h4 style="margin: 0 0 2px 0; color: #1e3a8a; font-size: 14px; text-align: center;">${desaName}</h4>
@@ -948,14 +885,12 @@
                             layer.bindPopup(popupContent);
                         }
                     });
-
                     tematikKependudukanGroup.addLayer(dynamicKependudukanLayer);
                     const bounds = dynamicKependudukanLayer.getBounds();
                     if(bounds.isValid()) map.fitBounds(bounds);
                 })
                 .catch(error => { console.error('Error:', error); alert('Gagal memuat detail data kependudukan.'); });
         }
-
         // ==========================================
         // SUBMENU PRODUKSI (APOTIK HIDUP & KOMODITAS)
         // ==========================================
@@ -967,13 +902,11 @@
                 alert('Silakan pilih Wilayah Kabupaten dan Kecamatan terlebih dahulu di dropdown filter!');
                 return;
             }
-
             if (typeof clearAllTematikLayers === 'function') clearAllTematikLayers();
             if (typeof tematikKesehatanGroup !== 'undefined') tematikKesehatanGroup.clearLayers();
             if (typeof tematikUmumGroup !== 'undefined') tematikUmumGroup.clearLayers();
             if (typeof tematikKependudukanGroup !== 'undefined') tematikKependudukanGroup.clearLayers();
             if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             fetch(`/api/tematik/produksi/${kategori}/${kecamatanCode}`)
                 .then(res => res.json())
                 .then(geojsonData => {
@@ -981,7 +914,6 @@
                         alert(`Data produksi ${kategori.replace('-', ' ')} belum tersedia untuk wilayah ini.`);
                         return;
                     }
-
                     const produksiLayer = L.geoJSON(geojsonData, {
                         style: function(feature) {
                             const props = feature.properties || {};
@@ -989,7 +921,6 @@
                             const hasData = listData.length > 0 || (props.total_jenis_tanaman && props.total_jenis_tanaman > 0);
                             
                             let themeColor = kategori === 'apotik-hidup' ? '#10b981' : '#f59e0b';
-
                             return {
                                 fillColor: hasData ? themeColor : '#cbd5e1',
                                 weight: 1.5,
@@ -1002,21 +933,17 @@
                             const props = feature.properties || {};
                             const desaName = props.nama_desa || 'Desa Tanpa Nama';
                             const desaCode = props.kode_desa || '-';
-
                             layer.bindTooltip(desaName, {
                                 permanent: true,
                                 direction: "center",
                                 className: "map-label"
                             });
-
                             let detailHtml = "";
-
                             if (kategori === 'apotik-hidup') {
                                 const listApotik = props.data_apotik_hidup || props.list_tanaman || props.data_produksi || props.tanaman_obat || [];
                                 const totalJenis = props.total_jenis_tanaman || listApotik.length || 0;
                                 const totalLuas = props.total_luas_lahan || props.total_luas || 0;
                                 const totalPanen = props.total_hasil_panen || props.total_panen || 0;
-
                                 detailHtml += `
                                     <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:bold; color:#059669; margin-bottom:6px;">
                                         <i class="fa-solid fa-mortar-pestle"></i>
@@ -1037,7 +964,6 @@
                                         </div>
                                     </div>
                                 `;
-
                                 if (listApotik.length > 0) {
                                     detailHtml += `
                                         <table style="width:100%; font-size:11px; border-collapse: collapse;">
@@ -1074,7 +1000,6 @@
                                     detailHtml += `<div style="background:#fffbeb; border:1px dashed #fcd34d; border-radius:6px; padding:6px; text-align:center; font-size:10px; color:#b45309;">Data komoditas belum tersedia.</div>`;
                                 }
                             }
-
                             const popupContent = `
                                 <div style="font-family: 'Segoe UI', sans-serif; min-width: 250px; padding: 2px;">
                                     <h4 style="margin:0 0 2px 0; color:#1e293b; font-size:14px; text-align:center; font-weight:700;">${desaName}</h4>
@@ -1085,11 +1010,9 @@
                                         <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i> Lihat Profil Desa
                                     </button>
                                 </div>`;
-
                             layer.bindPopup(popupContent);
                         }
                     });
-
                     if (typeof tematikProduksiGroup !== 'undefined') tematikProduksiGroup.addLayer(produksiLayer);
                     const bounds = produksiLayer.getBounds();
                     if (bounds.isValid()) map.fitBounds(bounds);
@@ -1099,7 +1022,6 @@
                     alert(`Terjadi kesalahan koneksi saat mengambil data ${kategori}.`);
                 });
         }
-
         // CONTROL ACCORDION TOGGLE
         function toggleKesehatanMenu(element) {
             const submenu = document.getElementById('submenu-kesehatan');
@@ -1107,21 +1029,18 @@
             if (submenu) submenu.classList.toggle('submenu-open');
             if (arrowIcon) arrowIcon.classList.toggle('rotate-arrow');
         }
-
         function toggleKependudukanMenu(element) {
             const submenu = document.getElementById('submenu-kependudukan');
             const arrowIcon = element.querySelector('.fa-chevron-right');
             if (submenu) submenu.classList.toggle('submenu-open');
             if (arrowIcon) arrowIcon.classList.toggle('rotate-arrow');
         }
-
         function togglePendidikanMenu(element) {
             const submenu = document.getElementById('submenu-pendidikan');
             const arrowIcon = element.querySelector('.fa-chevron-right');
             if (submenu) submenu.classList.toggle('submenu-open');
             if (arrowIcon) arrowIcon.classList.toggle('rotate-arrow');
         }
-
         // ==========================================
         // SINKRONISASI DROPDOWN WILAYAH
         // ==========================================
@@ -1135,7 +1054,6 @@
                 select.appendChild(opt);
             });
         }
-
         function populateKecamatanDropdown(data) {
             const select = document.getElementById('select-kecamatan');
             select.innerHTML = '<option value="">Pilih Kecamatan</option>';
@@ -1147,7 +1065,6 @@
                 select.appendChild(opt);
             });
         }
-
         function populateDesaDropdown(data) {
             const select = document.getElementById('select-desa');
             select.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
@@ -1159,7 +1076,6 @@
                 select.appendChild(opt);
             });
         }
-
         function filterFromDropdown(level, value) {
             if (!value) {
                 if(level === 'kabupaten') goBack();
@@ -1188,14 +1104,12 @@
                         layerTarget = group.getLayers().find(layer => layer.feature.properties.kode_desa === value);
                     });
                 }
-
                 if (layerTarget) {
                     map.fitBounds(layerTarget.getBounds());
                     layerTarget.fire('click');
                 }
             }
         }
-
         function resetDropdowns(level) {
             if (level <= 1) {
                 document.getElementById('select-kabupaten').value = "";
@@ -1207,7 +1121,6 @@
                 document.getElementById('select-desa').disabled = true;
             }
         }
-
         function goBack() {
             if (currentLevel === 'kecamatan') {
                 renderLevelKabupaten(activeKabCode);
@@ -1218,5 +1131,52 @@
             }
         }
     </script>
+    <!-- 2. TARUH DI PALING BAWAH FILE (Sebelum </body>) -->
+<div id="modal-lowongan" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.65); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div style="position: relative; width: 90%; height: 88%; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column;">
+        
+        <!-- Header Modal -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background-color: #1e3a8a; color: white;">
+            <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px;">
+                <i class="fa-solid fa-briefcase"></i>
+                <span>Portal Lowongan Kerja SiGajah Kerja</span>
+            </div>
+            <button onclick="tutupModalLowongan()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                &times;
+            </button>
+        </div>
+
+        <!-- Body Iframe -->
+        <div style="flex: 1; width: 100%; height: 100%; position: relative; background: #f8fafc;">
+            <iframe id="iframe-lowongan" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    function bukaModalLowongan(url) {
+        var modal = document.getElementById('modal-lowongan');
+        var iframe = document.getElementById('iframe-lowongan');
+        if (modal && iframe) {
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+    }
+    function tutupModalLowongan() {
+        var modal = document.getElementById('modal-lowongan');
+        var iframe = document.getElementById('iframe-lowongan');
+        if (modal && iframe) {
+            modal.style.display = 'none';
+            iframe.src = '';
+            
+            // Refresh peta agar kembali penuh sempurna
+            if (typeof map !== 'undefined' && map !== null) {
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+            }
+        }
+    }
+</script>
 </body>
 </html>
